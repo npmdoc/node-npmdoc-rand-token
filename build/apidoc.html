@@ -1,0 +1,320 @@
+<div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a
+
+        href="https://github.com/sehrope/node-rand-token#readme"
+
+    >rand-token (v0.3.0)</a>
+</h1>
+<h4>Generate random tokens</h4>
+<div class="apidocSectionDiv"><a
+    href="#apidoc.tableOfContents"
+    id="apidoc.tableOfContents"
+><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.rand-token">module rand-token</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.rand-token.generate">
+            function <span class="apidocSignatureSpan">rand-token.</span>generate
+            <span class="apidocSignatureSpan">(size, chars)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.rand-token.generator">
+            function <span class="apidocSignatureSpan">rand-token.</span>generator
+            <span class="apidocSignatureSpan">(options)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.rand-token.suid">
+            function <span class="apidocSignatureSpan">rand-token.</span>suid
+            <span class="apidocSignatureSpan">(length, epoch, prefixLength)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.rand-token.uid">
+            function <span class="apidocSignatureSpan">rand-token.</span>uid
+            <span class="apidocSignatureSpan">(size, chars)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.rand-token" id="apidoc.module.rand-token">module rand-token</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.rand-token.generate" id="apidoc.element.rand-token.generate">
+        function <span class="apidocSignatureSpan">rand-token.</span>generate
+        <span class="apidocSignatureSpan">(size, chars)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">generate = function (size, chars) {
+  if( chars ) {
+    validateTokenChars(chars);
+  } else {
+    chars = options.chars;
+  }
+  var max = Math.floor(256 / chars.length) * chars.length;
+  var ret = &#x22;&#x22;;
+  while( ret.length &#x3c; size ) {
+    var buf = options.source(size - ret.length);
+    for(var i=0;i&#x3c;buf.length;i++) {
+      var x = buf.readUInt8(i);
+      if( x &#x3c; max ) {
+        ret += chars[x % chars.length];
+      }
+    }
+  }
+  return ret;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+# Usage
+
+// Create a token generator with the default settings:
+var randtoken = require(&#x27;rand-token&#x27;);
+
+// Generate a 16 character alpha-numeric token:
+var token = randtoken.<span class="apidocCodeKeywordSpan">generate</span>(16);
+
+// Use it as a replacement for uid:
+var uid = require(&#x27;rand-token&#x27;).uid;
+var token = uid(16);
+
+// Generate mostly sequential tokens:
+var suid = require(&#x27;rand-token&#x27;).suid;
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.rand-token.generator" id="apidoc.element.rand-token.generator">
+        function <span class="apidocSignatureSpan">rand-token.</span>generator
+        <span class="apidocSignatureSpan">(options)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">function buildGenerator(options) {
+  assert(!options || typeof(options) == &#x27;object&#x27;);
+  options = options || {};
+  options.chars = options.chars || defaults.chars;
+  options.source = options.source || defaults.source;
+
+  // Allowed characters
+  switch( options.chars ) {
+    case &#x27;default&#x27;:
+      options.chars = alphaNumeric;
+      break;
+    case &#x27;a-z&#x27;:
+    case &#x27;alpha&#x27;:
+      options.chars = alphaLower;
+      break;
+    case &#x27;A-Z&#x27;:
+    case &#x27;ALPHA&#x27;:
+      options.chars = alphaUpper;
+      break;
+    case &#x27;0-9&#x27;:
+    case &#x27;numeric&#x27;:
+      options.chars = numeric;
+      break;
+    case &#x27;base32&#x27;:
+      options.chars = alphaUpper + &#x22;234567&#x22;;
+      break;
+    default:
+      // use the characters as is
+  }
+  validateTokenChars(options.chars);
+
+  // Source of randomness:
+  switch( options.source ) {
+    case &#x27;default&#x27;:
+      options.source = function(size, cb) {
+        return cryptoRandomBytes(size, !cb ? null : function (buf){
+          return cb(null, buf);
+        });
+      };
+      break;
+    case &#x27;crypto&#x27;:
+      options.source = crypto.randomBytes;
+      break;
+    case &#x27;math&#x27;:
+      options.source = function(size, cb) {
+        var buf = new Buffer(size);
+        for(var i=0;i&#x3c;size;i++) {
+          buf.writeUInt8(Math.floor(256 * Math.random()), i);
+        }
+        if( cb ) {
+          cb(null, buf);
+        } else {
+          return buf;
+        }
+      };
+      break;
+    default:
+      assert(typeof(options.source) == &#x27;function&#x27;);
+  }
+
+  return {
+    &#x22;generate&#x22;: function(size, chars) {
+      if( chars ) {
+        validateTokenChars(chars);
+      } else {
+        chars = options.chars;
+      }
+      var max = Math.floor(256 / chars.length) * chars.length;
+      var ret = &#x22;&#x22;;
+      while( ret.length &#x3c; size ) {
+        var buf = options.source(size - ret.length);
+        for(var i=0;i&#x3c;buf.length;i++) {
+          var x = buf.readUInt8(i);
+          if( x &#x3c; max ) {
+            ret += chars[x % chars.length];
+          }
+        }
+      }
+      return ret;
+    }
+  };
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+
+    // Generate a 24 (16 + 8) character alpha-numeric token:
+    var token = suid(16)
+
+To generate only lower case letters (a-z):
+
+    // Create a token generator with the default settings:
+    var randtoken = require(&#x27;rand-token&#x27;).<span class="apidocCodeKeywordSpan">generator</span>({
+      chars: &#x27;a-z&#x27;
+    });
+
+    // Generate a 16 character token:
+    var token = randtoken.generate(16);
+
+Alternatively, you can create a generator with the default options and pass the characters to use as the second parameter to `generate
+`:
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.rand-token.suid" id="apidoc.element.rand-token.suid">
+        function <span class="apidocSignatureSpan">rand-token.</span>suid
+        <span class="apidocSignatureSpan">(length, epoch, prefixLength)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">suid = function (length, epoch, prefixLength) {
+  epoch = epoch || defaultEpoch;
+  prefixLength = prefixLength || defaultPrefixLength;
+  return suidPrefix(epoch, prefixLength) + defaultGenerator.generate(length);
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.rand-token.uid" id="apidoc.element.rand-token.uid">
+        function <span class="apidocSignatureSpan">rand-token.</span>uid
+        <span class="apidocSignatureSpan">(size, chars)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">uid = function (size, chars) {
+  if( chars ) {
+    validateTokenChars(chars);
+  } else {
+    chars = options.chars;
+  }
+  var max = Math.floor(256 / chars.length) * chars.length;
+  var ret = &#x22;&#x22;;
+  while( ret.length &#x3c; size ) {
+    var buf = options.source(size - ret.length);
+    for(var i=0;i&#x3c;buf.length;i++) {
+      var x = buf.readUInt8(i);
+      if( x &#x3c; max ) {
+        ret += chars[x % chars.length];
+      }
+    }
+  }
+  return ret;
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
